@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiology Calculator</title>
+    <style>
+        :root {
+            --primary-color: #007bff; 
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d; 
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #343a40;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --input-bg: #fff;
+            --input-border: #ced4da;
+            --output-bg: #eef2f7; 
+            --box-shadow: 0 2px 10px rgba(0,0,0,0.075);
+            --border-radius: 0.3rem; 
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            margin: 0;
+            padding: 15px; 
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.5; 
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 25px; 
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 780px; 
+            margin: 15px auto; 
+        }
+        .main-subtitle {
+            text-align: center;
+            margin-top: -10px; 
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+        .tabs {
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px; 
+        }
+        .tabs button {
+            background-color: transparent;
+            float: left;
+            border: none;
+            border-bottom: 3px solid transparent; 
+            outline: none;
+            cursor: pointer;
+            padding: 10px 15px; 
+            transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            font-size: 0.95rem; 
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        .tabs button:hover {
+            color: var(--primary-color);
+        }
+        .tabs button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .tabcontent {
+            display: none;
+            padding: 8px 0;  
+            border-top: none;
+        }
+        .tabcontent.active {
+            display: block;
+        }
+        h1 {
+            color: var(--dark-gray);
+            text-align: center;
+            margin-bottom: 15px; 
+            font-size: 1.8rem; 
+        }
+        h2 {
+            color: var(--dark-gray);
+            margin-top: 15px; 
+            margin-bottom: 10px; 
+            font-size: 1.4rem; 
+            border-bottom: 1px solid var(--medium-gray);
+            padding-bottom: 6px; 
+        }
+        h3 {
+            color: var(--dark-gray);
+            margin-top: 10px; 
+            margin-bottom: 8px; 
+            font-size: 1.15rem; 
+        }
+        table {
+            width: 100%; 
+            border-collapse: collapse;
+            margin-bottom: 15px; 
+        }
+        td, th {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px; 
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+        }
+        input[type="number"], input[type="date"], select {
+            padding: 7px 9px; 
+            margin: 0; 
+            border: 1px solid var(--input-border);
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            width: 100%; 
+            font-size: 0.9rem; 
+            background-color: var(--input-bg);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        button.calc-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 15px; 
+            margin: 8px 5px 8px 0; 
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem; 
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out;
+        }
+        button.calc-button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        button.toggle-gender-button {
+            background-color: var(--secondary-color);
+            padding: 5px 8px;  
+            font-size: 0.8rem; 
+        }
+        button.toggle-gender-button:hover {
+            background-color: #5a6268;
+        }
+
+
+        .output-area {
+            display: inline-block; 
+            background-color: var(--output-bg);
+            padding: 5px 8px; 
+            border-radius: var(--border-radius);
+            margin: 0 5px; 
+            min-height: 1.4em;  
+            min-width: 50px;  
+            vertical-align: middle;
+            border: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+        .results-text p { 
+            background-color: var(--output-bg);
+            padding: 8px; 
+            border-radius: var(--border-radius);
+            margin: 6px 0; 
+            min-height: 1.4em;  
+            border: 1px solid var(--border-color);
+        }
+        .results-text p.blank-line { 
+            background-color: transparent; 
+            min-height: 0.5em;  
+            padding: 0; margin: 1px 0;  
+            border: none; 
+        }
+
+        .gender-male { background-color: #e6f2ff;  } 
+        .gender-female { background-color: #fff0f5;  } 
+        
+        #ba_inputArea { 
+            padding: 12px; 
+            border-radius: var(--border-radius);
+            margin-bottom: 12px; 
+            border: 1px solid var(--border-color);
+        }
+        #ba_inputArea.gender-male input[type="date"] { background-color: #f0f8ff; }
+        #ba_inputArea.gender-female input[type="date"] { background-color: #fff5f8; }
+
+
+        .input-group { 
+            margin-bottom: 10px;  
+            display: flex; 
+            align-items: center;
+        }
+        .input-group label { 
+            display: inline-block; 
+            width: 110px; 
+            margin-right: 8px; 
+            font-weight: 500;
+        }
+        .input-group input, .input-group select {
+            flex-grow: 1; 
+            width: auto; 
+        }
+        .input-group button { margin-left: 8px; } 
+
+
+        .brush-table {
+            margin-top: 10px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .brush-table caption {
+            font-weight: 600;
+            font-size: 1.15rem; 
+            padding: 10px; 
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .brush-table th, .brush-table td {
+            text-align: center;
+            padding: 6px; 
+        }
+        .brush-table thead th {
+            font-weight: 600;
+        }
+
+        #BrushDataBoys .brush-table { border-top: 3px solid #79aec8; } 
+        #BrushDataBoys .brush-table caption { background-color: #e9f3f8; color: #2c5d77; }
+        #BrushDataBoys .brush-table th { background-color: #f0f7fa; }
+        #BrushDataBoys .brush-table tbody tr:nth-child(even) { background-color: #f8fcff; }
+        #BrushDataBoys .brush-table tbody tr:nth-child(odd) { background-color: #fff; }
+
+        #BrushDataGirls .brush-table { border-top: 3px solid #e8a0a0; } 
+        #BrushDataGirls .brush-table caption { background-color: #fbe9e9; color: #772c2c; }
+        #BrushDataGirls .brush-table th { background-color: #fcf0f0; }
+        #BrushDataGirls .brush-table tbody tr:nth-child(even) { background-color: #fff8f8; }
+        #BrushDataGirls .brush-table tbody tr:nth-child(odd) { background-color: #fff; }
+
+        #ll_copyNotice {
+            font-style: italic;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Radiology Calculator</h1>
+    <p class="main-subtitle">by George W. Poulos, MD, PhD</p>
+
+    <div class="tabs">
+        <button class="tablink active" onclick="openTab(event, 'VesselStenosis')">Vessel Stenosis</button>
+        <button class="tablink" onclick="openTab(event, 'LegLength')">Leg Length</button>
+        <button class="tablink" onclick="openTab(event, 'BoneAge')">Bone Age</button>
+        <button class="tablink" onclick="openTab(event, 'BrushDataBoys')">Brush Data (Boys)</button>
+        <button class="tablink" onclick="openTab(event, 'BrushDataGirls')">Brush Data (Girls)</button>
+    </div>
+
+    <div id="VesselStenosis" class="tabcontent active">
+        <h2>Vessel Stenosis</h2>
+        <table>
+            <tr><th>Diameters</th><th>(in mm)</th></tr>
+            <tr><td>d1 (stenosed)</td><td><input type="number" id="vs_d1" oninput="calculateVesselStenosis()"></td></tr>
+            <tr><td>D1 (normal)</td><td><input type="number" id="vs_D1" oninput="calculateVesselStenosis()"></td></tr>
+            <tr><td>d2 (stenosed)</td><td><input type="number" id="vs_d2" oninput="calculateVesselStenosis()"></td></tr>
+            <tr><td>D2 (normal)</td><td><input type="number" id="vs_D2" oninput="calculateVesselStenosis()"></td></tr>
+        </table>
+        <h3>Stenosis</h3>
+        <table>
+            <tr><td>Linear d1/D1</td><td id="vs_linear_d1D1" class="output-area"></td></tr>
+            <tr><td>Linear d2/D2</td><td id="vs_linear_d2D2" class="output-area"></td></tr>
+            <tr><td>Stenosis By Area</td><td id="vs_stenosisByArea" class="output-area"></td></tr>
+        </table>
+        <button class="calc-button" onclick="clearVesselStenosis()">Clear Results</button>
+    </div>
+
+    <div id="LegLength" class="tabcontent">
+        <h2>Leg Length Discrepancy</h2>
+        <table>
+            <tr><th>Length</th><th>(in cm)</th></tr>
+            <tr><td>Right Femur</td><td><input type="number" id="ll_rf" oninput="calculateLegLength()"></td></tr>
+            <tr><td>Right Tibia</td><td><input type="number" id="ll_rt" oninput="calculateLegLength()"></td></tr>
+            <tr><td>Left Femur</td><td><input type="number" id="ll_lf" oninput="calculateLegLength()"></td></tr>
+            <tr><td>Left Tibia</td><td><input type="number" id="ll_lt" oninput="calculateLegLength()"></td></tr>
+        </table>
+        <h3>Totals</h3>
+        <table>
+            <tr><td>Total Right</td><td id="ll_totalRight" class="output-area"></td></tr>
+            <tr><td>Total Left</td><td id="ll_totalLeft" class="output-area"></td></tr>
+        </table>
+        <h3>Results:</h3>
+        <div id="ll_resultsText" class="results-text">
+            <p id="ll_res_rf"></p>
+            <p id="ll_res_lf"></p>
+            <p id="ll_res_femur_diff"></p>
+            <p class="blank-line"></p>
+            <p id="ll_res_rt"></p>
+            <p id="ll_res_lt"></p>
+            <p id="ll_res_tibia_diff"></p>
+            <p class="blank-line"></p>
+            <p id="ll_res_total_r"></p>
+            <p id="ll_res_total_l"></p>
+            <p id="ll_res_total_diff"></p>
+        </div>
+        <button class="calc-button" onclick="clearLegLength()">Clear Results</button>
+        <button class="calc-button" onclick="copyLegLengthResults()">Copy Results to Clipboard</button>
+        <span id="ll_copyNotice" style="margin-left: 10px; font-weight: bold;"></span>
+    </div>
+
+    <div id="BoneAge" class="tabcontent">
+        <h2>Bone Age Tool</h2>
+        <div id="ba_inputArea">
+            <div class="input-group">
+                <label for="ba_gender">Gender</label>
+                <select id="ba_gender" onchange="calculateBoneAge(); updateBoneAgeInputColors();">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <button onclick="toggleGender()" class="calc-button toggle-gender-button">Toggle Gender</button>
+            </div>
+            <div class="input-group">
+                <label for="ba_birthDate">Birthdate</label>
+                <input type="date" id="ba_birthDate" onchange="calculateBoneAge()">
+            </div>
+            <div class="input-group">
+                <label for="ba_lastStudyDate">Last Study</label>
+                <input type="date" id="ba_lastStudyDate" onchange="calculateBoneAge()">
+            </div>
+        </div>
+        <h3>Patient's chronologic age is:</h3>
+        <p><span id="ba_chronoYears" class="output-area"></span> Years, <span id="ba_chronoMonths" class="output-area"></span> Months</p>
+        <h3>The bone age standard deviation is:</h3>
+        <p><span id="ba_stdDev" class="output-area"></span> Months</p>
+        <h3>Time since the last exam:</h3>
+        <p><span id="ba_timeSinceYears" class="output-area"></span> Years, <span id="ba_timeSinceMonths" class="output-area"></span> Months</p>
+        <button class="calc-button" onclick="clearBoneAge()">Clear Results</button>
+    </div>
+
+    <div id="BrushDataBoys" class="tabcontent">
+        <!-- Table will be populated by JavaScript -->
+    </div>
+
+    <div id="BrushDataGirls" class="tabcontent">
+        <!-- Table will be populated by JavaScript -->
+    </div>
+</div>
+
+<script>
+    const brushFoundationBoys = [
+        { years: 0, months: 3, sd: 0.69, mean: 3.01, numFilms: 121, totalMonthsCalculated: 3 }, { years: 0, months: 6, sd: 1.13, mean: 6.09, numFilms: 129, totalMonthsCalculated: 6 }, { years: 0, months: 9, sd: 1.43, mean: 9.56, numFilms: 137, totalMonthsCalculated: 9 }, { years: 1, months: 0, sd: 1.97, mean: 12.74, numFilms: 130, totalMonthsCalculated: 12 }, { years: 1, months: 6, sd: 3.52, mean: 19.36, numFilms: 106, totalMonthsCalculated: 18 }, { years: 2, months: 0, sd: 3.92, mean: 25.97, numFilms: 105, totalMonthsCalculated: 24 }, { years: 2, months: 6, sd: 4.52, mean: 32.4, numFilms: 107, totalMonthsCalculated: 30 }, { years: 3, months: 0, sd: 5.08, mean: 38.21, numFilms: 127, totalMonthsCalculated: 36 }, { years: 3, months: 6, sd: 5.4, mean: 43.89, numFilms: 138, totalMonthsCalculated: 42 }, { years: 4, months: 0, sd: 6.66, mean: 49.04, numFilms: 170, totalMonthsCalculated: 48 }, { years: 4, months: 6, sd: 8.36, mean: 56, numFilms: 176, totalMonthsCalculated: 54 }, { years: 5, months: 0, sd: 8.79, mean: 62.43, numFilms: 191, totalMonthsCalculated: 60 }, { years: 6, months: 0, sd: 9.17, mean: 75.46, numFilms: 186, totalMonthsCalculated: 72 }, { years: 7, months: 0, sd: 8.91, mean: 88.2, numFilms: 182, totalMonthsCalculated: 84 }, { years: 8, months: 0, sd: 9.1, mean: 101.38, numFilms: 168, totalMonthsCalculated: 96 }, { years: 9, months: 0, sd: 9, mean: 113.9, numFilms: 160, totalMonthsCalculated: 108 }, { years: 10, months: 0, sd: 9.79, mean: 125.68, numFilms: 177, totalMonthsCalculated: 120 }, { years: 11, months: 0, sd: 10.09, mean: 137.32, numFilms: 154, totalMonthsCalculated: 132 }, { years: 12, months: 0, sd: 10.38, mean: 148.82, numFilms: 165, totalMonthsCalculated: 144 }, { years: 13, months: 0, sd: 10.44, mean: 158.39, numFilms: 175, totalMonthsCalculated: 156 }, { years: 14, months: 0, sd: 10.72, mean: 170.02, numFilms: 163, totalMonthsCalculated: 168 }, { years: 15, months: 0, sd: 11.32, mean: 182.72, numFilms: 124, totalMonthsCalculated: 180 }, { years: 16, months: 0, sd: 12.86, mean: 195.32, numFilms: 99, totalMonthsCalculated: 192 }, { years: 17, months: 0, sd: 13.05, mean: 206.21, numFilms: 68, totalMonthsCalculated: 204 }
+    ];
+    const brushFoundationGirls = [
+        { years: 0, months: 3, sd: 0.72, mean: 3.02, numFilms: 108, totalMonthsCalculated: 3 }, { years: 0, months: 6, sd: 1.16, mean: 6.04, numFilms: 121, totalMonthsCalculated: 6 }, { years: 0, months: 9, sd: 1.36, mean: 9.05, numFilms: 122, totalMonthsCalculated: 9 }, { years: 1, months: 0, sd: 1.77, mean: 12.04, numFilms: 117, totalMonthsCalculated: 12 }, { years: 1, months: 6, sd: 3.49, mean: 18.22, numFilms: 93, totalMonthsCalculated: 18 }, { years: 2, months: 0, sd: 4.64, mean: 24.16, numFilms: 101, totalMonthsCalculated: 24 }, { years: 2, months: 6, sd: 5.37, mean: 30.96, numFilms: 98, totalMonthsCalculated: 30 }, { years: 3, months: 0, sd: 5.97, mean: 36.63, numFilms: 133, totalMonthsCalculated: 36 }, { years: 3, months: 6, sd: 7.48, mean: 43.5, numFilms: 131, totalMonthsCalculated: 42 }, { years: 4, months: 0, sd: 8.98, mean: 50.14, numFilms: 154, totalMonthsCalculated: 48 }, { years: 4, months: 6, sd: 10.73, mean: 60.06, numFilms: 152, totalMonthsCalculated: 54 }, { years: 5, months: 0, sd: 11.65, mean: 66.21, numFilms: 167, totalMonthsCalculated: 60 }, { years: 6, months: 0, sd: 10.23, mean: 78.5, numFilms: 191, totalMonthsCalculated: 72 }, { years: 7, months: 0, sd: 9.64, mean: 89.3, numFilms: 200, totalMonthsCalculated: 84 }, { years: 8, months: 0, sd: 10.23, mean: 100.66, numFilms: 201, totalMonthsCalculated: 96 }, { years: 9, months: 0, sd: 10.74, mean: 113.06, numFilms: 195, totalMonthsCalculated: 108 }, { years: 10, months: 0, sd: 11.73, mean: 125.66, numFilms: 206, totalMonthsCalculated: 120 }, { years: 11, months: 0, sd: 11.94, mean: 137.67, numFilms: 203, totalMonthsCalculated: 132 }, { years: 12, months: 0, sd: 10.24, mean: 149.62, numFilms: 198, totalMonthsCalculated: 144 }, { years: 13, months: 0, sd: 10.67, mean: 162.28, numFilms: 179, totalMonthsCalculated: 156 }, { years: 14, months: 0, sd: 11.3, mean: 174.25, numFilms: 170, totalMonthsCalculated: 168 }, { years: 15, months: 0, sd: 9.23, mean: 183.62, numFilms: 117, totalMonthsCalculated: 180 }, { years: 16, months: 0, sd: 7.31, mean: 189.44, numFilms: 64, totalMonthsCalculated: 192 }
+    ];
+
+    function getElement(id) { return document.getElementById(id); }
+    function getValue(id) { return getElement(id).value; }
+    function getNumericValue(id) { return parseFloat(getValue(id)); }
+    function setText(id, text) { getElement(id).textContent = text; }
+    function clearValue(id) { getElement(id).value = ''; }
+    function clearText(id) { setText(id, ''); }
+
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+        getElement(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    function populateBrushDataTable(containerId, data) {
+        const container = getElement(containerId);
+        if (!container) return;
+        
+        let h2Title = "";
+        const h2Element = container.querySelector('h2'); 
+        if(h2Element) { 
+            h2Title = h2Element.textContent; 
+        } else { 
+            h2Title = containerId.includes("Boys") ? "Brush Foundation Data (Boys)" : "Brush Foundation Data (Girls)";
+            const newH2 = document.createElement('h2');
+            newH2.textContent = h2Title;
+            container.insertBefore(newH2, container.firstChild); 
+        }
+        
+        const studyTitle = "Brush Foundation Study";
+        const table = document.createElement('table');
+        table.className = 'brush-table';
+        const caption = table.createCaption();
+        caption.innerHTML = `${h2Title}<br>${studyTitle}`; 
+        
+        const thead = table.createTHead();
+        const headerRow1 = thead.insertRow();
+        const thChronAge = headerRow1.insertCell(); 
+        thChronAge.colSpan = 2;
+        thChronAge.textContent = 'Chronologic Age'; 
+        headerRow1.insertCell().textContent = 'Standard Deviation'; 
+        headerRow1.insertCell().textContent = 'Mean'; 
+
+        const headerRow2 = thead.insertRow();
+        headerRow2.insertCell().textContent = 'Years'; 
+        headerRow2.insertCell().textContent = 'Months'; 
+        headerRow2.insertCell().textContent = ''; 
+        headerRow2.insertCell().textContent = ''; 
+
+        const tbody = table.createTBody();
+        data.forEach(item => { 
+            const row = tbody.insertRow();
+            row.insertCell().textContent = item.years;
+            row.insertCell().textContent = item.months;
+            row.insertCell().textContent = item.sd.toFixed(2); 
+            row.insertCell().textContent = item.mean.toFixed(2); 
+        });
+        
+        const existingTable = container.querySelector('.brush-table');
+        if (existingTable) container.removeChild(existingTable); 
+        container.appendChild(table); 
+    }
+
+    function setupInputNavigation(inputIdArray) {
+        inputIdArray.forEach((inputId, index) => {
+            const inputElement = getElement(inputId);
+            if (inputElement) {
+                inputElement.addEventListener('keydown', (event) => {
+                    const isLastInput = index === inputIdArray.length - 1;
+                    const isFirstInput = index === 0;
+
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        const nextIndex = (index + 1) % inputIdArray.length; 
+                        const nextInputElement = getElement(inputIdArray[nextIndex]);
+                        if (nextInputElement) {
+                            nextInputElement.focus();
+                            if (typeof nextInputElement.select === 'function') {
+                                nextInputElement.select();
+                            }
+                        }
+                    } else if (event.key === 'Tab') {
+                        if (!event.shiftKey && !isLastInput) { 
+                            event.preventDefault();
+                            const nextInputElement = getElement(inputIdArray[index + 1]);
+                            if (nextInputElement) {
+                                nextInputElement.focus();
+                                if (typeof nextInputElement.select === 'function') {
+                                    nextInputElement.select();
+                                }
+                            }
+                        } else if (event.shiftKey && !isFirstInput) { 
+                            event.preventDefault();
+                            const prevInputElement = getElement(inputIdArray[index - 1]);
+                            if (prevInputElement) {
+                                prevInputElement.focus();
+                                if (typeof prevInputElement.select === 'function') {
+                                    prevInputElement.select();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        populateBrushDataTable('BrushDataBoys', brushFoundationBoys);
+        populateBrushDataTable('BrushDataGirls', brushFoundationGirls);
+        const firstTabLink = document.querySelector('.tabs button');
+        if (firstTabLink) {
+             firstTabLink.classList.add('active');
+             const firstTabContentId = firstTabLink.getAttribute('onclick').match(/'([^']+)'/)[1];
+             getElement(firstTabContentId).style.display = 'block';
+        }
+        updateBoneAgeInputColors(); 
+
+        const vsInputIds = ['vs_d1', 'vs_D1', 'vs_d2', 'vs_D2'];
+        const llInputIds = ['ll_rf', 'll_rt', 'll_lf', 'll_lt'];
+        const baInputIds = ['ba_gender', 'ba_birthDate', 'ba_lastStudyDate']; 
+
+        setupInputNavigation(vsInputIds);
+        setupInputNavigation(llInputIds);
+        setupInputNavigation(baInputIds);
+    });
+
+    function calculateVesselStenosis() {
+        const d1=getNumericValue('vs_d1'), D1=getNumericValue('vs_D1'), d2=getNumericValue('vs_d2'), D2=getNumericValue('vs_D2');
+        let r1="", r2="", ra="";
+        if(!isNaN(d1)&&!isNaN(D1)&&D1!==0) r1=((1-(d1/D1))*100).toFixed(1)+'%'; setText('vs_linear_d1D1',r1);
+        if(!isNaN(d2)&&!isNaN(D2)&&D2!==0) r2=((1-(d2/D2))*100).toFixed(1)+'%'; setText('vs_linear_d2D2',r2);
+        if(isNaN(d1)||isNaN(D1)||isNaN(d2)||isNaN(D2)||D1===0||D2===0) ra=""; else ra=((1-(d1*d2)/(D1*D2))*100).toFixed(1)+'%'; setText('vs_stenosisByArea',ra);
+    }
+    function clearVesselStenosis() { ['vs_d1','vs_D1','vs_d2','vs_D2'].forEach(clearValue); calculateVesselStenosis(); }
+
+    function calculateLegLength() {
+        const rf=getNumericValue('ll_rf'), rt=getNumericValue('ll_rt'), lf=getNumericValue('ll_lf'), lt=getNumericValue('ll_lt');
+        let tr=NaN, tl=NaN;
+        if(rf>0&&rt>0){tr=rf+rt; setText('ll_totalRight',tr.toFixed(1)+" cm");}else{clearText('ll_totalRight');}
+        if(lf>0&&lt>0){tl=lf+lt; setText('ll_totalLeft',tl.toFixed(1)+" cm");}else{clearText('ll_totalLeft');}
+        setText('ll_res_rf',rf>0?`Right Femur: ${rf.toFixed(1)} cm.`:''); setText('ll_res_lf',lf>0?`Left Femur: ${lf.toFixed(1)} cm.`:'');
+        if(rf>0&&lf>0){if(Math.abs(rf-lf)<0.01)setText('ll_res_femur_diff',"Difference: No difference in femurs.");else if(rf>lf)setText('ll_res_femur_diff',`Difference: The right femur is longer by ${(rf-lf).toFixed(1)} cm.`);else setText('ll_res_femur_diff',`Difference: The left femur is longer by ${(lf-rf).toFixed(1)} cm.`);}else{clearText('ll_res_femur_diff');}
+        setText('ll_res_rt',rt>0?`Right Tibia: ${rt.toFixed(1)} cm.`:''); setText('ll_res_lt',lt>0?`Left Tibia: ${lt.toFixed(1)} cm.`:'');
+        if(rt>0&&lt>0){if(Math.abs(rt-lt)<0.01)setText('ll_res_tibia_diff',"Difference: No difference in tibiae.");else if(rt>lt)setText('ll_res_tibia_diff',`Difference: The right tibia is longer by ${(rt-lt).toFixed(1)} cm.`);else setText('ll_res_tibia_diff',`Difference: The left tibia is longer by ${(lt-rt).toFixed(1)} cm.`);}else{clearText('ll_res_tibia_diff');}
+        setText('ll_res_total_r',!isNaN(tr)?`Right Leg Length: ${tr.toFixed(1)} cm.`:''); setText('ll_res_total_l',!isNaN(tl)?`Left Leg Length: ${tl.toFixed(1)} cm.`:'');
+        if(!isNaN(tr)&&!isNaN(tl)){if(Math.abs(tr-tl)<0.01)setText('ll_res_total_diff',"Difference: No difference in total leg length.");else if(tr>tl)setText('ll_res_total_diff',`Difference: The right leg is longer by ${(tr-tl).toFixed(1)} cm.`);else setText('ll_res_total_diff',`Difference: The left leg is longer by ${(tl-tr).toFixed(1)} cm.`);}else{clearText('ll_res_total_diff');}
+    }
+    function clearLegLength() { ['ll_rf','ll_rt','ll_lf','ll_lt'].forEach(clearValue); clearText('ll_copyNotice'); calculateLegLength(); }
+    
+    function copyLegLengthResults() {
+        let builtString = "";
+        const pElements = getElement('ll_resultsText').children; 
+
+        for (let i = 0; i < pElements.length; i++) {
+            const pElement = pElements[i];
+            if (pElement.tagName !== 'P') continue; 
+
+            if (pElement.classList.contains('blank-line')) {
+                builtString += "\n";
+            } else {
+                const textContent = pElement.textContent;
+                if (textContent && textContent.trim() !== "") {
+                    builtString += textContent + "\n";
+                }
+            }
+        }
+        if (builtString.length > 0 && builtString.endsWith("\n")) {
+            builtString = builtString.slice(0, -1);
+        }
+        const textToCopy = builtString;
+
+        if (navigator.clipboard && textToCopy) { 
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                setText('ll_copyNotice', '** Copied to clipboard! **');
+                setTimeout(() => clearText('ll_copyNotice'), 3000);
+            }).catch(err => {
+                setText('ll_copyNotice', 'Failed to copy.');
+                console.error('Failed to copy text: ', err);
+            });
+        } else if (textToCopy) { 
+             setText('ll_copyNotice', 'Clipboard API not available. Manual copy needed.');
+        } else { 
+            setText('ll_copyNotice', 'Nothing to copy.');
+        }
+    }
+
+    // --- Bone Age ---
+    function getRoundedAgeInYearsMonths(startDateStr, endDateStr) {
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+            return { years: "", months: "" };
+        }
+        const diffMillis = end.getTime() - start.getTime();
+        const avgMillisInMonth = (1000 * 60 * 60 * 24 * 365.25) / 12;
+        const totalMonthsFloat = diffMillis / avgMillisInMonth;
+        const roundedTotalMonths = Math.round(totalMonthsFloat);
+        const finalYears = Math.floor(roundedTotalMonths / 12);
+        const finalMonths = roundedTotalMonths % 12;
+        return { years: finalYears, months: finalMonths };
+    }
+
+    function updateBoneAgeInputColors(){const g=getValue('ba_gender'),ia=getElement('ba_inputArea'),bd=getElement('ba_birthDate'),ls=getElement('ba_lastStudyDate');if(g==="Male"){ia.classList.remove('gender-female');ia.classList.add('gender-male');bd.style.backgroundColor='#f0f8ff';ls.style.backgroundColor='#f0f8ff';}else{ia.classList.remove('gender-male');ia.classList.add('gender-female');bd.style.backgroundColor='#fff5f8';ls.style.backgroundColor='#fff5f8';}}
+    
+    function calculateBoneAge(){
+        const birthDateStr = getValue('ba_birthDate');
+        const lastStudyDateStr = getValue('ba_lastStudyDate');
+        const gender = getValue('ba_gender');
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        let patientChronoYears = ""; 
+        let patientChronoMonthsRemainder = ""; 
+
+        if (birthDateStr) {
+            const chronoAge = getRoundedAgeInYearsMonths(birthDateStr, todayStr);
+            patientChronoYears = chronoAge.years; 
+            patientChronoMonthsRemainder = chronoAge.months; 
+
+            if (patientChronoYears !== "" && patientChronoMonthsRemainder !== "") {
+                setText('ba_chronoYears', patientChronoYears);
+                setText('ba_chronoMonths', patientChronoMonthsRemainder);
+
+                const dataTable = gender === "Male" ? brushFoundationBoys : brushFoundationGirls;
+                let closestEntry = null;
+                let minDifference = Infinity;
+
+                if (typeof patientChronoYears === 'number' && typeof patientChronoMonthsRemainder === 'number') {
+                    const patientRoundedTotalChronoMonths = (patientChronoYears * 12) + patientChronoMonthsRemainder;
+
+                    if (dataTable.length > 0) {
+                        for (const entry of dataTable) {
+                            const difference = Math.abs(patientRoundedTotalChronoMonths - entry.totalMonthsCalculated);
+                            if (difference < minDifference) {
+                                minDifference = difference;
+                                closestEntry = entry;
+                            } 
+                        }
+                    }
+                }
+                
+                if (closestEntry) {
+                    setText('ba_stdDev', closestEntry.sd.toFixed(2));
+                } else { 
+                    clearText('ba_stdDev'); 
+                }
+            } else { 
+                 clearText('ba_chronoYears');
+                 clearText('ba_chronoMonths');
+                 clearText('ba_stdDev');
+            }
+        } else {
+            clearText('ba_chronoYears');
+            clearText('ba_chronoMonths');
+            clearText('ba_stdDev');
+        }
+
+        if (lastStudyDateStr) {
+            const timeSince = getRoundedAgeInYearsMonths(lastStudyDateStr, todayStr);
+            if(timeSince.years !== "" && timeSince.months !== ""){
+                setText('ba_timeSinceYears', timeSince.years);
+                setText('ba_timeSinceMonths', timeSince.months);
+            } else {
+                clearText('ba_timeSinceYears');
+                clearText('ba_timeSinceMonths');
+            }
+        } else {
+            clearText('ba_timeSinceYears');
+            clearText('ba_timeSinceMonths');
+        }
+        updateBoneAgeInputColors();
+    }
+
+    function toggleGender(){const gs=getElement('ba_gender');gs.value=(gs.value==="Male")?"Female":"Male";calculateBoneAge();}
+    function clearBoneAge(){clearValue('ba_birthDate');clearValue('ba_lastStudyDate');calculateBoneAge();}
+</script>
+</body>
+</html>
